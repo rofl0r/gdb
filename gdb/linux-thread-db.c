@@ -24,6 +24,7 @@
 #include <dlfcn.h>
 #include "gdb_proc_service.h"
 #include "gdb_thread_db.h"
+#include "threadtol.h"
 
 #include "bfd.h"
 #include "command.h"
@@ -1059,7 +1060,7 @@ attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
      if we change GDB to always have at least one thread in the thread
      list this will have to go somewhere else; maybe private == NULL
      until the thread_db target claims it.  */
-  gdb_assert (ti_p->ti_tid != 0);
+  gdb_assert (THREADTOL(ti_p->ti_tid) != 0);
   private->th = *th_p;
   private->tid = ti_p->ti_tid;
 
@@ -1335,7 +1336,7 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
   if (ti.ti_state == TD_THR_UNKNOWN || ti.ti_state == TD_THR_ZOMBIE)
     return 0;			/* A zombie -- ignore.  */
 
-  if (ti.ti_tid == 0 && target_has_execution)
+  if (THREADTOL(ti.ti_tid) == 0 && target_has_execution)
     {
       /* A thread ID of zero means that this is the main thread, but
 	 glibc has not yet initialized thread-local storage and the

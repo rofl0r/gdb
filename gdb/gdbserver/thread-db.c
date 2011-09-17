@@ -29,6 +29,7 @@ static int thread_db_use_events;
 
 #include "gdb_proc_service.h"
 #include "../gdb_thread_db.h"
+#include "../threadtol.h"
 
 #ifndef USE_LIBTHREAD_DB_DIRECTLY
 #include <dlfcn.h>
@@ -290,7 +291,7 @@ find_one_thread (ptid_t ptid)
 
   if (debug_threads)
     fprintf (stderr, "Found thread %ld (LWP %d)\n",
-	     ti.ti_tid, ti.ti_lid);
+	     THREADTOL(ti.ti_tid), ti.ti_lid);
 
   if (lwpid != ti.ti_lid)
     {
@@ -309,7 +310,7 @@ find_one_thread (ptid_t ptid)
 
   /* If the new thread ID is zero, a final thread ID will be available
      later.  Do not enable thread debugging yet.  */
-  if (ti.ti_tid == 0)
+  if (THREADTOL(ti.ti_tid) == 0)
     return 0;
 
   lwp->thread_known = 1;
@@ -327,13 +328,13 @@ attach_thread (const td_thrhandle_t *th_p, td_thrinfo_t *ti_p)
 
   if (debug_threads)
     fprintf (stderr, "Attaching to thread %ld (LWP %d)\n",
-	     ti_p->ti_tid, ti_p->ti_lid);
+	     THREADTOL(ti_p->ti_tid), ti_p->ti_lid);
   linux_attach_lwp (ti_p->ti_lid);
   lwp = find_lwp_pid (pid_to_ptid (ti_p->ti_lid));
   if (lwp == NULL)
     {
       warning ("Could not attach to thread %ld (LWP %d)\n",
-	       ti_p->ti_tid, ti_p->ti_lid);
+	       THREADTOL(ti_p->ti_tid), ti_p->ti_lid);
       return 0;
     }
 
